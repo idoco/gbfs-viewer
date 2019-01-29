@@ -1,0 +1,56 @@
+<html>
+
+<head>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin="" />
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+        crossorigin=""></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #mainMap {
+            height: 100%;
+            z-index: 5;
+        }
+
+        .options {
+            z-index: 10;
+            position: fixed;
+            top: 35px;
+            left: 65px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+
+        <div class="options">
+            <span>
+                Select GBFS Data
+            </span>
+            <select>
+                <option value="volvo">Volvo</option>
+                <option value="saab">Saab</option>
+                <option value="mercedes">Mercedes</option>
+                <option value="audi">Audi</option>
+            </select>
+        </div>
+
+        <div id="mainMap"></div>
+
+    </div>
+
+    <script src="/index.js"></script>
+
+</body>
+
+
+</html>
