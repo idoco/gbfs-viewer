@@ -6,13 +6,15 @@ var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?ac
     accessToken: 'pk.eyJ1IjoiaWRvY28iLCJhIjoiY2ptM2JnbW5lMGN6czN2bW14NXUzMGZ2YyJ9.xIvjUlL3cPhak8p0ucOnxg'
 }).addTo(mainMap);
 
-async function foo() {
-
-    let response = await fetch('https://mds.bird.co/gbfs/tel-aviv/free_bikes' + '?time=' + Date.now());
+async function loadBikes(url) {
+    let response = await fetch(url + '?time=' + Date.now());
     let freeBikes = await response.json();
+    return freeBikes.data.bikes;
+}
+
+async function showBikes(bikes) {
 
     let markers = [];
-    let bikes = freeBikes.data.bikes;
     for (let i in bikes) {
         let bike = bikes[i];
         let marker = L.marker([bike.lat, bike.lon])
@@ -29,4 +31,9 @@ async function foo() {
 
 }
 
-foo();
+async function main(url) {
+    let bikes = await loadBikes('https://mds.bird.co/gbfs/tel-aviv/free_bikes');
+    showBikes(bikes)
+}
+
+main();
