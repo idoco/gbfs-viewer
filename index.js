@@ -8,10 +8,15 @@ var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?ac
 
 async function foo() {
 
-    // read our JSON
     let response = await fetch('https://mds.bird.co/gbfs/tel-aviv/free_bikes');
-    let user = await response.json();
-
+    let freeBikes = await response.json();
+    
+    let bikes = freeBikes.data.bikes;
+    for (let i in bikes) {
+        let bike = bikes[i];
+        L.marker([bike.lat, bike.lon]).addTo(mainMap);
+    }
+    
 }
 
 foo();
