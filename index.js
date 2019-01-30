@@ -8,9 +8,10 @@ var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?ac
 }).addTo(mainMap);
 
 let currentMarkerGroup; // the currently displayed marker layer 
+let currentBikesUrl = "https://mds.bird.co/gbfs/tel-aviv/free_bikes";
 
 async function fetchWithCors(url) {
-    return await fetch('https://cors.io/?' + url);
+    return await fetch('https://cors-anywhere.herokuapp.com/' + url);
 }
 
 async function loadBikes(url) {
@@ -35,6 +36,14 @@ async function showBikes(bikes) {
 
     currentMarkerGroup = L.featureGroup(markers).addTo(mainMap);
     mainMap.fitBounds(currentMarkerGroup.getBounds());
+}
+
+async function refreshBikes(url) {
+            if (currentMarkerGroup) {
+                mainMap.removeLayer(currentMarkerGroup);
+            }
+            let bikes = await loadBikes(url);
+            await showBikes(bikes)
 }
 
 async function loadCsv(url) {
@@ -71,21 +80,23 @@ async function main() {
             const feeds = systemData.data.en.feeds;
             for (let i in feeds) {
                 if (feeds[i].name == 'free_bike_status' || feeds[i].name == 'free_bikes') {
-                    freeBikesUrl = feeds[i].url;
+                    currentBikesUrl = feeds[i].url;
                     break;
                 }
             }
 
-            mainMap.removeLayer(currentMarkerGroup);
-            let bikes = await loadBikes(freeBikesUrl);
-            await showBikes(bikes)
+            await refreshBikes(currentBikesUrl)
         }
 
     });
 
+    document.getElementById("refresh-button").addEventListener('click', () => {
+        refreshBikes(currentBikesUrl)
+    })
+
     // Load bird Tel aviv on launch
-    let bikes = await loadBikes('https://mds.bird.co/gbfs/tel-aviv/free_bikes');
-    let displayedMarkers = await showBikes(bikes)
+    await refreshBikes('https://mds.bird.co/gbfs/tel-aviv/free_bikes')
+
 }
 
 main();
