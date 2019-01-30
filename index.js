@@ -8,7 +8,7 @@ var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?ac
 
 async function foo() {
 
-    let response = await fetch('https://mds.bird.co/gbfs/tel-aviv/free_bikes');
+    let response = await fetch('https://mds.bird.co/gbfs/tel-aviv/free_bikes' + '?time=' + Date.now());
     let freeBikes = await response.json();
 
     let markers = [];
