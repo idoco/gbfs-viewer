@@ -11,7 +11,7 @@ let currentMarkerGroup; // the currently displayed marker layer
 let currentBikesUrl = "https://mds.bird.co/gbfs/tel-aviv/free_bikes";
 
 async function fetchWithCors(url) {
-    return await fetch('https://cors.io/' + url);
+    return await fetch('https://cors.io/?' + url);
 }
 
 async function loadBikes(url) {
