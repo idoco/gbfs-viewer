@@ -15,7 +15,6 @@ async function foo() {
     let bikes = freeBikes.data.bikes;
     for (let i in bikes) {
         let bike = bikes[i];
-        // L.marker([bike.lat, bike.lon]).addTo(mainMap);
         let marker = L.marker([bike.lat, bike.lon]);
         markers.push(marker);
     }
