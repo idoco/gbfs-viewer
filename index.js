@@ -10,13 +10,19 @@ async function foo() {
 
     let response = await fetch('https://mds.bird.co/gbfs/tel-aviv/free_bikes');
     let freeBikes = await response.json();
-    
+
+    let markers = [];
     let bikes = freeBikes.data.bikes;
     for (let i in bikes) {
         let bike = bikes[i];
-        L.marker([bike.lat, bike.lon]).addTo(mainMap);
+        // L.marker([bike.lat, bike.lon]).addTo(mainMap);
+        let marker = L.marker([bike.lat, bike.lon]);
+        markers.push(marker);
     }
-    
+
+    var group = L.featureGroup(markers).addTo(mainMap);
+    mainMap.fitBounds(group.getBounds());
+
 }
 
 foo();
