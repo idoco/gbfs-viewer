@@ -27,7 +27,8 @@ async function showBikes(bikes) {
             .bindPopup(
                 `bike_id: ${bike.bike_id}<br/>
                 is_disabled: ${!!bike.is_disabled}
-                <br/>is_reserved: ${!!bike.is_reserved}`
+                <br/>is_reserved: ${!!bike.is_reserved}
+                <br/>vehicle_type: ${bike.vehicle_type || 'unknown'}`
             );
         markers.push(marker);
     }
