@@ -15,7 +15,12 @@ async function foo() {
     let bikes = freeBikes.data.bikes;
     for (let i in bikes) {
         let bike = bikes[i];
-        let marker = L.marker([bike.lat, bike.lon]);
+        let marker = L.marker([bike.lat, bike.lon])
+            .bindPopup(
+                `bike_id: ${bike.bike_id}<br/>
+                is_disabled: ${!!bike.is_disabled}
+                <br/>is_reserved: ${!!bike.is_reserved}`
+            );
         markers.push(marker);
     }
 
