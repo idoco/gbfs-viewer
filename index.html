@@ -13,6 +13,9 @@
     <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
         crossorigin=""></script>
 
+    <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.8.9/jquery.csv.min.js"></script>
+
     <style>
         body {
             margin: 0;
@@ -37,11 +40,11 @@
     <div>
 
         <div class="options">
-            <span>
+            <div>
                 Select GBFS Data
-            </span>
-            <select>
-                <option value="bird-tel-aviv">Bird Tel Aviv</option>
+            </div>
+            <select id="select-system">
+                <!-- Adding the avilable systems from  -->
             </select>
         </div>
 
