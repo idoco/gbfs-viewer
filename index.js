@@ -82,7 +82,7 @@ async function main() {
         const systemUrlResponse = await fetchWithCors(systemUrl + '?time=' + Date.now());
         const systemData = await systemUrlResponse.json();
 
-        if (systemData.data && systemData.data.en.feeds) {
+        if (systemData.data && systemData.data.en && systemData.data.en.feeds) {
             const feeds = systemData.data.en.feeds;
             for (let i in feeds) {
                 if (feeds[i].name == 'free_bike_status' || feeds[i].name == 'free_bikes') {
