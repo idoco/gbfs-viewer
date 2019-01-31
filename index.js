@@ -1,8 +1,8 @@
 
 // Map creation
-var mainMap = L.map('mainMap').setView([32.0795, 34.7812], 14);
+const mainMap = L.map('mainMap').setView([32.0795, 34.7812], 14);
 
-var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+const tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     id: 'mapbox.streets',
     accessToken: 'pk.eyJ1IjoiaWRvY28iLCJhIjoiY2ptM2JnbW5lMGN6czN2bW14NXUzMGZ2YyJ9.xIvjUlL3cPhak8p0ucOnxg'
 }).addTo(mainMap);
@@ -10,6 +10,7 @@ var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?ac
 let currentMarkerGroup; // the currently displayed marker layer 
 let currentBikesUrl = "https://mds.bird.co/gbfs/tel-aviv/free_bikes";
 
+// Some GBFS systems do not support cross origin requests
 async function fetchWithCors(url) {
     return await fetch('https://cors.io/?' + url);
 }
@@ -18,6 +19,20 @@ async function loadBikes(url) {
     let response = await fetchWithCors(url + '?time=' + Date.now());
     let freeBikes = await response.json();
     return freeBikes.data.bikes;
+}
+
+async function refreshBikes(url) {
+    document.getElementById("loader").style.display = "block"
+    try {
+        if (currentMarkerGroup) { // clear current markers before showing new
+            mainMap.removeLayer(currentMarkerGroup); 
+        }
+        let bikes = await loadBikes(url);
+        await showBikes(bikes)
+    } catch (e) {
+        console.log(e);
+    }
+    document.getElementById("loader").style.display = "none";
 }
 
 async function showBikes(bikes) {
@@ -38,34 +53,18 @@ async function showBikes(bikes) {
     mainMap.fitBounds(currentMarkerGroup.getBounds());
 }
 
-async function refreshBikes(url) {
-    document.getElementById("loader").style.display = "block"
-    try {
-        if (currentMarkerGroup) {
-            mainMap.removeLayer(currentMarkerGroup);
-        }
-        let bikes = await loadBikes(url);
-        await showBikes(bikes)
-    } catch (e) {
-        console.log(e);
-    }
-    document.getElementById("loader").style.display = "none";
-}
-
 async function loadCsv(url) {
     let response = await fetch(url);
     let rawCsv = await response.text()
     let csv = $.csv.toArrays(rawCsv)
-    csv.shift() // remove header row
+    csv.shift() // remove csv header row
     csv.unshift(["IL", "Bird gbfs", "Tel Aviv", "BIRD_TLV", "bird.co", 'https://mds.bird.co/gbfs']); // Add bird 
     return csv;
 }
 
 async function main() {
-
-    let csv = await loadCsv('https://raw.githubusercontent.com/NABSA/gbfs/master/systems.csv');
-
-    var selectSystem = document.getElementById("select-system");
+    const csv = await loadCsv('https://raw.githubusercontent.com/NABSA/gbfs/master/systems.csv');
+    const selectSystem = document.getElementById("select-system");
 
     for (let i in csv) {
         let opt = csv[i][1];
@@ -80,23 +79,20 @@ async function main() {
 
         const selectedIndex = document.getElementById("select-system").selectedIndex;
         const systemUrl = csv[selectedIndex][5];
-
-        let response = await fetchWithCors(systemUrl + '?time=' + Date.now());
-        let systemData = await response.json();
+        const systemUrlResponse = await fetchWithCors(systemUrl + '?time=' + Date.now());
+        const systemData = await systemUrlResponse.json();
 
         if (systemData.data && systemData.data.en.feeds) {
             const feeds = systemData.data.en.feeds;
             for (let i in feeds) {
                 if (feeds[i].name == 'free_bike_status' || feeds[i].name == 'free_bikes') {
                     currentBikesUrl = feeds[i].url;
+                    await refreshBikes(currentBikesUrl)
                     break;
                 }
             }
-
-            await refreshBikes(currentBikesUrl)
         }
         document.getElementById("loader").style.display = "none";
-
     });
 
     document.getElementById("refresh-button").addEventListener('click', () => {
@@ -105,7 +101,6 @@ async function main() {
 
     // Load bird Tel aviv on launch
     await refreshBikes('https://mds.bird.co/gbfs/tel-aviv/free_bikes')
-
 }
 
 main();
