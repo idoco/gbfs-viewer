@@ -39,11 +39,17 @@ async function showBikes(bikes) {
 }
 
 async function refreshBikes(url) {
-            if (currentMarkerGroup) {
-                mainMap.removeLayer(currentMarkerGroup);
-            }
-            let bikes = await loadBikes(url);
-            await showBikes(bikes)
+    document.getElementById("loader").style.display = "block"
+    try {
+        if (currentMarkerGroup) {
+            mainMap.removeLayer(currentMarkerGroup);
+        }
+        let bikes = await loadBikes(url);
+        await showBikes(bikes)
+    } catch (e) {
+        console.log(e);
+    }
+    document.getElementById("loader").style.display = "none";
 }
 
 async function loadCsv(url) {
@@ -70,6 +76,8 @@ async function main() {
     }
 
     selectSystem.addEventListener("change", async () => {
+        document.getElementById("loader").style.display = "block"
+
         const selectedIndex = document.getElementById("select-system").selectedIndex;
         const systemUrl = csv[selectedIndex][5];
 
@@ -87,6 +95,7 @@ async function main() {
 
             await refreshBikes(currentBikesUrl)
         }
+        document.getElementById("loader").style.display = "none";
 
     });
 
