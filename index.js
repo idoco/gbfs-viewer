@@ -49,6 +49,8 @@ async function showBikes(bikes) {
         markers.push(marker);
     }
 
+    document.getElementById('bike-count').textContent = bikes.length || 'N/A'
+    
     currentMarkerGroup = L.featureGroup(markers).addTo(mainMap);
     mainMap.fitBounds(currentMarkerGroup.getBounds());
 }
