@@ -12,7 +12,7 @@ let currentBikesUrl = "https://mds.bird.co/gbfs/tel-aviv/free_bikes";
 
 // Some GBFS systems do not support cross origin requests
 async function fetchWithCors(url) {
-    return await fetch('https://test.cors.workers.dev/?' + url);
+    return await fetch('https://cors.idoco.workers.dev/?' + url);
 }
 
 async function loadBikes(url) {
