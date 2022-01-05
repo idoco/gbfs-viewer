@@ -33,13 +33,14 @@ function getPriceInSegment(segment, duration) {
 }
 
 async function getGbfsPricePerMin(pricingPlan, duration) {
-    let price = 0;
+    let price = pricingPlan.price;
+    console.log(pricingPlan);
     pricingPlan.per_min_pricing.map(segment => price += getPriceInSegment(segment, duration))
     return price;
 }
 
 async function getGbfsPricePerKm(pricingPlan, duration) {
-    const price = 0;
+    const price = pricingPlan.price;
     pricingPlan.per_km_pricing.map(segment => getPriceInSegment(segment, duration))
     return price;
 }

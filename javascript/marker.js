@@ -7,7 +7,12 @@ let currentStationsUrl = false;
 
 // Some GBFS systems do not support cross origin requests
 async function fetchWithCors(url) {
+    try{
     return await fetch('https://cors.idoco.workers.dev/?' + url);
+    }catch(e){
+        alert("The GBFS URL is invalid")
+        return false;
+    }
 }
 
 async function loadBikes(url) {

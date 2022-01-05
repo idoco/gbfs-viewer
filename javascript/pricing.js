@@ -59,10 +59,11 @@ async function refreshPricing({
     const pricingPlan = pricingPlans[selectedPricingIndex];
     let price = 0;
     if (pricingPlan == undefined) {
-        pricingWentWrong("no valid per pricing plan found");
+        pricingWentWrong("no valid pricing plan found");
         return;
     }
-    else if (pricingPlan.per_min_pricing !== undefined) {
+    else if (pricingPlan.per_min_pricing !== false) {
+        console.log("hallo");
         price += await getGbfsPricePerMin(pricingPlan, currentDuration)
     } if (pricingPlan.per_km_pricing !== undefined) {
         price += await getGbfsPricePerKm(pricingPlan, currentDistance)

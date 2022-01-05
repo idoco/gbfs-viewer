@@ -41,6 +41,23 @@ function addEventListeners() {
         currentPricingOptions.currentDistance = distanceInput.value;
         refreshPricing(currentPricingOptions)
     })
+
+    const selectCustomSystemForm = document.getElementById("submit-custom-system");
+    selectCustomSystemForm.addEventListener("click", async() => {
+        document.getElementById("loader").style.display = "block"
+        const systemUrl = document.getElementById("custom-system-input").value;
+        const systemUrlResponse = await fetchWithCors(systemUrl + '?time=' + Date.now());
+
+        if(systemUrlResponse === false){
+            const systemUrl = document.getElementById("custom-system-input").value = " "
+            document.getElementById("loader").style.display = "none";
+            return false
+        }
+
+        const systemData = await systemUrlResponse.json();
+        console.log(systemData);
+        updateContent(systemData)
+    })
 }
 
 async function main() {
@@ -60,32 +77,12 @@ async function main() {
 
         const selectedIndex = document.getElementById("select-system").selectedIndex;
         const systemUrl = csv[selectedIndex][5];
+        console.log(systemUrl);
         const systemUrlResponse = await fetchWithCors(systemUrl + '?time=' + Date.now());
+
         const systemData = await systemUrlResponse.json();
 
-        if (systemData.data && systemData.data.en && systemData.data.en.feeds) {
-            const feeds = systemData.data.en.feeds;
-            currentStationsUrl = false;
-            currentPricingOptions.currentPricingUrl = false;
-
-            feeds.map(feed => {
-                if (feed.name == 'station_information') {
-                    currentStationsUrl = feed.url;
-                } else if (feed.name == 'system_pricing_plans') {
-                    currentPricingOptions.currentPricingUrl = feed.url;
-                    currentPricingOptions.selectedPricingIndex = 0;
-                }
-            })
-            feeds.map(async feed => {
-                if (feed.name == 'free_bike_status' || feed.name == 'free_bikes') {
-                    currentBikesUrl = feed.url;
-                    await refreshBikes(currentBikesUrl)
-                    refreshPricing(currentPricingOptions);
-                }
-
-            })
-            document.getElementById("loader").style.display = "none";
-        }
+        updateContent(systemData);
     });
 
     addEventListeners();
@@ -95,6 +92,31 @@ async function main() {
     await refreshPricing(currentPricingOptions);
 }
 
+function updateContent(systemData) {
+    if (systemData.data) {
+        const feedKey = Object.keys(systemData.data)[0];
+        const feeds = systemData.data[feedKey].feeds;
+        currentStationsUrl = false;
+        currentPricingOptions.currentPricingUrl = false;
+
+        feeds.map(feed => {
+            if (feed.name == 'station_information') {
+                currentStationsUrl = feed.url;
+            } else if (feed.name == 'system_pricing_plans') {
+                currentPricingOptions.currentPricingUrl = feed.url;
+                currentPricingOptions.selectedPricingIndex = 0;
+            }
+        });
+        feeds.map(async (feed) => {
+            if (feed.name == 'free_bike_status' || feed.name == 'free_bikes') {
+                currentBikesUrl = feed.url;
+                await refreshBikes(currentBikesUrl);
+                refreshPricing(currentPricingOptions);
+            }
+
+        });
+        document.getElementById("loader").style.display = "none";
+    }
+}
+
 main();
-
-
