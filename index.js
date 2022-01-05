@@ -55,7 +55,6 @@ function addEventListeners() {
         }
 
         const systemData = await systemUrlResponse.json();
-        console.log(systemData);
         updateContent(systemData)
     })
 }
@@ -77,7 +76,6 @@ async function main() {
 
         const selectedIndex = document.getElementById("select-system").selectedIndex;
         const systemUrl = csv[selectedIndex][5];
-        console.log(systemUrl);
         const systemUrlResponse = await fetchWithCors(systemUrl + '?time=' + Date.now());
 
         const systemData = await systemUrlResponse.json();

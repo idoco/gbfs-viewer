@@ -63,11 +63,9 @@ async function refreshPricing({
         return;
     }
     else if (pricingPlan.per_min_pricing !== false) {
-        console.log("hallo");
         price += await getGbfsPricePerMin(pricingPlan, currentDuration)
     } if (pricingPlan.per_km_pricing !== undefined) {
         price += await getGbfsPricePerKm(pricingPlan, currentDistance)
     }
-    price += pricingPlan.price;
     document.getElementById("price").textContent = price + pricingPlan.currency;
 }

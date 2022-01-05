@@ -34,7 +34,6 @@ function getPriceInSegment(segment, duration) {
 
 async function getGbfsPricePerMin(pricingPlan, duration) {
     let price = pricingPlan.price;
-    console.log(pricingPlan);
     pricingPlan.per_min_pricing.map(segment => price += getPriceInSegment(segment, duration))
     return price;
 }
