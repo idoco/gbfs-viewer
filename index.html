@@ -8,26 +8,35 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
         crossorigin="" />
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ"
-        crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+        integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 
     <!-- Make sure you put this AFTER Leaflet's CSS -->
-    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+        integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
         crossorigin=""></script>
 
     <script src="https://code.jquery.com/jquery-1.8.2.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.8.9/jquery.csv.min.js"></script>
 
     <style>
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
+
         body {
             margin: 0;
             padding: 0;
         }
 
-        #mainMap {
+        #map {
             height: 100%;
             z-index: 5;
         }
@@ -94,31 +103,72 @@
                 transform: rotate(360deg);
             }
         }
+
+        h4 {
+            font-weight: 500;
+            font-size: medium;
+            margin: 5px 0px;
+        }
     </style>
 </head>
 
 <body>
     <div>
+
+
         <div class="options">
             <h3 style="margin: 0px;">GBFS Viewer</h3>
-            <div>
-                <code>Select GBFS System</code>
-            </div>
-            <select id="select-system">
-                <!-- Adding the avilable systems from  -->
-            </select>
 
-            <div style="margin-top: 5px;" >
-                <code>Number of bikes: </code> <code id="bike-count"> </code>
+
+            <div>
+                <h4>Select GBFS System</h4>
+                <select id="select-system">
+                    <!-- Adding the avilable systems from  -->
+                </select>
+                <h4>Or insert your own GBFS URL</h4>
+                    <input id='custom-system-input' type='url' /> 
+                    <button id="submit-custom-system" type="button">Submit</button>
             </div>
+
+
+            <div style="margin-top: 5px;">
+                <h4>Number of bikes: <code id="bike-count"> </code></h4>
+            </div>
+
+
+            <div id="pricing" style="margin-top: 5px;">
+                <h4>Select a pricing plan</h4>
+                <select id="select-pricing-plan"></select>
+
+
+                <div style="margin-top: 5;">
+                    <div style="margin-top: 5px;">
+                        <h4>Select your journey time(min):</h4>
+                        <input id="duration-input" type="number" />
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <h4>Select your journey distance(km):</h4>
+                        <input id="distance-input" type="number" />
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <code id="price"> </code>
+                    </div>
+                </div>
+            </div>
+            <code id="no-pricing-plan-found">no pricing plan found</code>
         </div>
+
+
         <div id="loader" class="loader"></div>
 
-        <div id="mainMap"></div>
-
+        <div id="map"></div>
     </div>
 
-    <script src="./index.js"></script>
+    <script type="text/javascript" src="./javascript/priceCalculator.js"></script>
+    <script type="text/javascript" src="./javascript/pricing.js"></script>
+    <script type="text/javascript" src="./javascript/marker.js"></script>
+    <script type="text/javascript" src="./index.js"></script>
+
 
     <a href="#" class="float" id="refresh-button">
         <i class="fa fa-sync-alt my-float"></i>

@@ -1,59 +1,14 @@
-
 // Map creation
-const mainMap = L.map('mainMap').setView([32.0795, 34.7812], 14);
+var map = L.map('map');
 
-const tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-    id: 'mapbox.streets',
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+    tileSize: 512,
+    maxZoom: 18,
+    zoomOffset: -1,
+    id: 'mapbox/streets-v11',
     accessToken: 'pk.eyJ1IjoiaWRvY28iLCJhIjoiY2ptM2JnbW5lMGN6czN2bW14NXUzMGZ2YyJ9.xIvjUlL3cPhak8p0ucOnxg'
-}).addTo(mainMap);
-
-let currentMarkerGroup; // the currently displayed marker layer 
-let currentBikesUrl = "https://mds.bird.co/gbfs/tel-aviv/free_bikes";
-
-// Some GBFS systems do not support cross origin requests
-async function fetchWithCors(url) {
-    return await fetch('https://cors.idoco.workers.dev/?' + url);
-}
-
-async function loadBikes(url) {
-    let response = await fetchWithCors(url + '?time=' + Date.now());
-    let freeBikes = await response.json();
-    return freeBikes.data.bikes;
-}
-
-async function refreshBikes(url) {
-    document.getElementById("loader").style.display = "block"
-    try {
-        if (currentMarkerGroup) { // clear current markers before showing new
-            mainMap.removeLayer(currentMarkerGroup); 
-        }
-        let bikes = await loadBikes(url);
-        await showBikes(bikes)
-    } catch (e) {
-        console.log(e);
-    }
-    document.getElementById("loader").style.display = "none";
-}
-
-async function showBikes(bikes) {
-    let markers = [];
-    for (let i in bikes) {
-        let bike = bikes[i];
-        let marker = L.marker([bike.lat, bike.lon])
-            .bindPopup(
-                `bike_id: ${bike.bike_id}<br/>
-                is_disabled: ${!!bike.is_disabled}
-                <br/>is_reserved: ${!!bike.is_reserved}
-                <br/>vehicle_type: ${bike.vehicle_type || 'unknown'}`
-            );
-        markers.push(marker);
-    }
-
-    document.getElementById('bike-count').textContent = bikes.length || 'N/A'
-    
-    currentMarkerGroup = L.featureGroup(markers).addTo(mainMap);
-    mainMap.fitBounds(currentMarkerGroup.getBounds());
-}
+}).addTo(map);
 
 async function loadCsv(url) {
     let response = await fetch(url);
@@ -64,13 +19,53 @@ async function loadCsv(url) {
     return csv;
 }
 
+function addEventListeners() {
+    const durationInput = document.getElementById("duration-input");
+    durationInput.addEventListener("change", async => {
+        currentPricingOptions.currentDuration = durationInput.value;
+        refreshPricing(currentPricingOptions);
+    });
+
+    document.getElementById("refresh-button").addEventListener('click', () => {
+        refreshBikes(currentBikesUrl);
+    });
+
+    const selectPricingPlan = document.getElementById("select-pricing-plan");
+    selectPricingPlan.addEventListener("change", async => {
+        selectedPricingIndex = selectPricingPlan.value;
+        refreshPricing(currentPricingOptions);
+    });
+
+    const distanceInput = document.getElementById("distance-input");
+    distanceInput.addEventListener("change", async => {
+        currentPricingOptions.currentDistance = distanceInput.value;
+        refreshPricing(currentPricingOptions)
+    })
+
+    const selectCustomSystemForm = document.getElementById("submit-custom-system");
+    selectCustomSystemForm.addEventListener("click", async() => {
+        document.getElementById("loader").style.display = "block"
+        const systemUrl = document.getElementById("custom-system-input").value;
+        const systemUrlResponse = await fetchWithCors(systemUrl + '?time=' + Date.now());
+
+        if(systemUrlResponse === false){
+            const systemUrl = document.getElementById("custom-system-input").value = " "
+            document.getElementById("loader").style.display = "none";
+            return false
+        }
+
+        const systemData = await systemUrlResponse.json();
+        updateContent(systemData)
+    })
+}
+
 async function main() {
     const csv = await loadCsv('https://raw.githubusercontent.com/NABSA/gbfs/master/systems.csv');
     const selectSystem = document.getElementById("select-system");
 
-    for (let i in csv) {
-        let opt = csv[i][1];
-        let el = document.createElement("option");
+    for (const i in csv) {
+        const opt = csv[i][1];
+        const el = document.createElement("option");
         el.textContent = opt;
         el.value = opt;
         selectSystem.appendChild(el);
@@ -82,27 +77,44 @@ async function main() {
         const selectedIndex = document.getElementById("select-system").selectedIndex;
         const systemUrl = csv[selectedIndex][5];
         const systemUrlResponse = await fetchWithCors(systemUrl + '?time=' + Date.now());
+
         const systemData = await systemUrlResponse.json();
 
-        if (systemData.data && systemData.data.en && systemData.data.en.feeds) {
-            const feeds = systemData.data.en.feeds;
-            for (let i in feeds) {
-                if (feeds[i].name == 'free_bike_status' || feeds[i].name == 'free_bikes') {
-                    currentBikesUrl = feeds[i].url;
-                    await refreshBikes(currentBikesUrl)
-                    break;
-                }
-            }
-        }
-        document.getElementById("loader").style.display = "none";
+        updateContent(systemData);
     });
 
-    document.getElementById("refresh-button").addEventListener('click', () => {
-        refreshBikes(currentBikesUrl)
-    })
+    addEventListeners();
 
     // Load bird Tel aviv on launch
-    await refreshBikes('https://mds.bird.co/gbfs/tel-aviv/free_bikes')
+    await refreshBikes('https://mds.bird.co/gbfs/tel-aviv/free_bikes');
+    await refreshPricing(currentPricingOptions);
+}
+
+function updateContent(systemData) {
+    if (systemData.data) {
+        const feedKey = Object.keys(systemData.data)[0];
+        const feeds = systemData.data[feedKey].feeds;
+        currentStationsUrl = false;
+        currentPricingOptions.currentPricingUrl = false;
+
+        feeds.map(feed => {
+            if (feed.name == 'station_information') {
+                currentStationsUrl = feed.url;
+            } else if (feed.name == 'system_pricing_plans') {
+                currentPricingOptions.currentPricingUrl = feed.url;
+                currentPricingOptions.selectedPricingIndex = 0;
+            }
+        });
+        feeds.map(async (feed) => {
+            if (feed.name == 'free_bike_status' || feed.name == 'free_bikes') {
+                currentBikesUrl = feed.url;
+                await refreshBikes(currentBikesUrl);
+                refreshPricing(currentPricingOptions);
+            }
+
+        });
+        document.getElementById("loader").style.display = "none";
+    }
 }
 
 main();
